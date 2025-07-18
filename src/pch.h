@@ -3,5 +3,4 @@
 #include <RE/Skyrim.h>
 #include <SKSE/SKSE.h>
 
-namespace logs = SKSE::log;
-using namespace std::literals;
+namespace logger = SKSE::log;
