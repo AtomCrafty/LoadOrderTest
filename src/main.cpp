@@ -1,5 +1,35 @@
 #include <spdlog/sinks/basic_file_sink.h>
 
+void ProcessPluginsTxt()
+{
+	REL::Relocation<const char*> AppDataFolder(RELOCATION_ID(524595, 411235));
+
+	std::ifstream is{ std::filesystem::path(AppDataFolder.get()) / "Plugins.txt" };
+	std::string line{};
+
+	if (is.is_open()) {
+		logger::info("Contents of Plugins.txt:");
+
+		while (std::getline(is, line)) {
+			if (line.empty() || line.starts_with('#')) {
+				continue;
+			}
+
+			if (line.starts_with('*')) {
+				logger::info("* {}", line.c_str() + 1);
+			}
+			else {
+				logger::info("  {}", line);
+			}
+		}
+	}
+	else {
+		logger::info("Unable to read Plugins.txt");
+	}
+
+	logger::info("");
+}
+
 void ProcessLoadedPlugins()
 {
 	const auto data = RE::TESDataHandler::GetSingleton();
@@ -40,12 +70,17 @@ void ProcessDataDirectory()
 void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 {
 	switch (msg->type) {
+	case SKSE::MessagingInterface::kInputLoaded:
+		logger::info("----------------[kInputLoaded]----------------");
+		ProcessPluginsTxt();
+		break;
+
 	case SKSE::MessagingInterface::kDataLoaded:
-	{
+		logger::info("----------------[kDataLoaded]----------------");
+		ProcessPluginsTxt();
 		ProcessLoadedPlugins();
 		ProcessDataDirectory();
 		break;
-	}
 
 	default:
 		break;
