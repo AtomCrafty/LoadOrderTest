@@ -1,5 +1,26 @@
 #include <spdlog/sinks/basic_file_sink.h>
 
+void CheckEngineFixesPatch()
+{
+	// https://github.com/aers/EngineFixesSkyrim64/blob/f592d56e5bd156e84c046e6a22f5e5ef4448e79a/src/patches/miscpatches.cpp#L197
+	// This function in the 1.6.629 - 1.6.640 build of SSE Engine Fixes (and possibly other builds)
+	// patches ReadPluginList to immediately return false. This prevents any plugins from loading on 1.6.1170.
+
+	REL::Relocation<const unsigned char> ReadPluginList(RELOCATION_ID(13650, 13758));
+
+	constexpr unsigned char patch[] = { 0xB0, 0x00, 0xC3 };
+
+	if (memcmp(reinterpret_cast<void*>(ReadPluginList.address()), patch, sizeof patch) != 0) {
+		logger::info("ReadPluginList patch not detected");
+	}
+	else {
+		logger::info("ReadPluginList patch detected");
+		logger::info("You most likely have an incorrect version of SSE Engine Fixes installed");
+	}
+
+	logger::info("");
+}
+
 void ProcessPluginsTxt()
 {
 	REL::Relocation<const char*> AppDataFolder(RELOCATION_ID(524595, 411235));
@@ -89,6 +110,7 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 	switch (msg->type) {
 	case SKSE::MessagingInterface::kInputLoaded:
 		logger::info("----------------[kInputLoaded]----------------");
+		CheckEngineFixesPatch();
 		ProcessPluginsTxt();
 		break;
 
