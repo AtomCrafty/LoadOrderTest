@@ -7,16 +7,22 @@ void ProcessPluginsTxt()
 	std::ifstream is{ std::filesystem::path(AppDataFolder.get()) / "Plugins.txt" };
 	std::string line{};
 
+	int totalPlugins = 0;
+	int enabledPlugins = 0;
+
 	if (is.is_open()) {
-		logger::info("Contents of Plugins.txt:");
+		logger::info("Mods according to Plugins.txt:");
 
 		while (std::getline(is, line)) {
 			if (line.empty() || line.starts_with('#')) {
 				continue;
 			}
 
+			totalPlugins++;
+
 			if (line.starts_with('*')) {
 				logger::info("* {}", line.c_str() + 1);
+				enabledPlugins++;
 			}
 			else {
 				logger::info("  {}", line);
@@ -26,6 +32,17 @@ void ProcessPluginsTxt()
 	else {
 		logger::info("Unable to read Plugins.txt");
 	}
+
+	logger::info("");
+	logger::info("{} of {} plugins enabled", enabledPlugins, totalPlugins);
+
+	static int lastEnabledPlugins = enabledPlugins;
+
+	if (lastEnabledPlugins != enabledPlugins) {
+		logger::info("WARNING: Enabled plugin count has changed since last scan");
+	}
+
+	lastEnabledPlugins = enabledPlugins;
 
 	logger::info("");
 }
