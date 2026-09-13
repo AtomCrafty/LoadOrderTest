@@ -144,7 +144,7 @@ void InitializeLog(spdlog::level::level_enum level = spdlog::level::info)
 	spdlog::set_pattern("%v");
 }
 
-extern "C" __declspec(dllexport) bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* skse)
+extern "C" __declspec(dllexport) bool SKSEPlugin_Load(const SKSE::LoadInterface* skse)
 {
 	InitializeLog();
 	SKSE::Init(skse, false);
